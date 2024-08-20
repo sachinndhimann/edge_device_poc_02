@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WWF Chat Kiosk</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            color: #ffffff;
+        }
+
+        .background-video video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .chat-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+            width: 80%;
+            max-width: 600px;
+            height: 80%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin: auto;
+        }
+
+        .chat-header {
+            padding: 15px;
+            background-color: #3d6e30;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        .chat-body {
+            padding: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+            font-size: 1.2em;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+        }
+
+        .user-message {
+            font-family: 'Courier New', Courier, monospace;
+            color: #00ff00;
+        }
+
+        .bot-message {
+            font-family: 'Georgia', serif;
+            color: #ffcc00;
+        }
+
+        .chat-footer {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            background-color: #3d6e30;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .chat-input {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        .chat-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn {
+            background-color: #1d5f1f;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #0b3b13;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="background-video">
+        <video autoplay muted loop id="wildlifeVideo">
+            templates\3011374-uhd_3840_2160_24fps.mp4
+            <source src="{{ url_for('static', filename='videos/3011374-uhd_3840_2160_24fps.mp4') }}" type="video/mp4">
+
+            Your browser does not support HTML5 video.
+        </video>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            World Wildlife Fund Chat
+        </div>
+        <div class="chat-body" id="chat-body">
+            <div class="chat-message bot-message">
+                <strong>WWF Bot:</strong> Welcome to the World Wildlife Fund! How can we help you protect wildlife today?
+            </div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" class="chat-input" id="chat-input" placeholder="Type your message here...">
+            <div class="chat-buttons">
+                <button class="btn" id="send-btn">Send</button>
+                <button class="btn" id="reset-btn">Reset Chat</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to send a message to the Flask backend
+        async function sendMessage() {
+            const message = document.getElementById('chat-input').value;
+            if (message) {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: message })
+                });
+
+                const data = await response.json();
+                const chatBody = document.getElementById('chat-body');
+
+                if (response.ok) {
+                    chatBody.innerHTML += `<div class="chat-message user-message"><strong>You:</strong> ${message}</div>`;
+                    chatBody.innerHTML += `<div class="chat-message bot-message"><strong>WWF Bot:</strong> ${data.response}</div>`;
+                } else {
+                    chatBody.innerHTML += `<div class="chat-message bot-message"><strong>WWF Bot:</strong> Error: ${data.error}</div>`;
+                }
+
+                document.getElementById('chat-input').value = '';
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        }
+
+        // Function to reset the conversation
+        async function resetChat() {
+            const response = await fetch('/reset', {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                document.getElementById('chat-body').innerHTML = '<div class="chat-message bot-message"><strong>WWF Bot:</strong> Conversation history reset.</div>';
+            } else {
+                document.getElementById('chat-body').innerHTML += '<div class="chat-message bot-message"><strong>WWF Bot:</strong> Failed to reset conversation.</div>';
+            }
+
+            document.getElementById('chat-input').value = '';
+        }
+
+        document.getElementById('send-btn').addEventListener('click', sendMessage);
+        document.getElementById('reset-btn').addEventListener('click', resetChat);
+    </script>
+</body>
+
+</html>
