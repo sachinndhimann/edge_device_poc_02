@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Person Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0ece4;
+            background-image: url('https://upload.wikimedia.org/wikipedia/en/thumb/2/24/WWF_logo.svg/1200px-WWF_logo.svg.png');
+            background-size: 200px;
+            background-position: top right;
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .person-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            background-color: #00ff00;
+        }
+
+        .person-details {
+            margin-bottom: 20px;
+        }
+
+        .person-details h2 {
+            margin: 0;
+            color: #333;
+        }
+
+        .person-details p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .score {
+            background-color: #efefef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <img id="personImage" class="person-image" src="{{ url_for('static', filename='image/user.jpeg') }}"" alt="Person Image">
+        <div class="person-details">
+            <h2 id="personName">John Doe</h2>
+            <p id="personAge">Age: 28</p>
+            <p id="personSex">Gender: Male</p>
+            <p id="personLocation">Location: New York, USA</p>
+        </div>
+        <div class="score">
+            Overall Kiosk Engagement Score: <span id="engagementScore">85%</span>
+        </div>
+        <div class="score">
+            Conversation Score: <span id="conversationScore">7/10</span>
+        </div>
+        <div class="person-details">
+            <p id="personExpression">Expression: Content</p>
+        </div>
+    </div>
+
+</body>
+
+</html>

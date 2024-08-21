@@ -14,6 +14,10 @@
             overflow: hidden;
             position: relative;
             color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000000;
         }
 
         .background-video video {
@@ -26,17 +30,25 @@
             z-index: -1;
         }
 
+        .content-container {
+            display: flex;
+            justify-content: space-between;
+            width: 90%;
+            max-width: 1200px;
+            z-index: 1;
+        }
+
         .chat-container {
             background-color: rgba(0, 0, 0, 0.7);
             border-radius: 10px;
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
-            width: 80%;
+            width: 60%;
             max-width: 600px;
-            height: 80%;
+            height: 80vh;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            margin: auto;
+            margin-right: 20px;
         }
 
         .chat-header {
@@ -67,6 +79,12 @@
         .bot-message {
             font-family: 'Georgia', serif;
             color: #ffcc00;
+        }
+
+        .typing-indicator {
+            font-style: italic;
+            color: #cccccc;
+            margin-bottom: 10px;
         }
 
         .chat-footer {
@@ -106,6 +124,25 @@
         .btn:hover {
             background-color: #0b3b13;
         }
+
+        .webcam-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            width: 35%;
+            max-width: 400px;
+            height: 80vh;
+        }
+
+        .webcam-container video {
+            border-radius: 10px;
+            width: 100%;
+            height: auto;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
 
@@ -115,34 +152,72 @@
         <video autoplay muted loop id="wildlifeVideo">
             templates\3011374-uhd_3840_2160_24fps.mp4
             <source src="{{ url_for('static', filename='videos/3011374-uhd_3840_2160_24fps.mp4') }}" type="video/mp4">
-
             Your browser does not support HTML5 video.
         </video>
     </div>
 
-    <div class="chat-container">
-        <div class="chat-header">
-            World Wildlife Fund Chat
-        </div>
-        <div class="chat-body" id="chat-body">
-            <div class="chat-message bot-message">
-                <strong>WWF Bot:</strong> Welcome to the World Wildlife Fund! How can we help you protect wildlife today?
+    <div class="content-container">
+        <div class="chat-container">
+            <div class="chat-header">
+                World Wildlife Fund Chat
+            </div>
+            <div class="chat-body" id="chat-body">
+                <div class="chat-message bot-message">
+                    <strong>WWF Bot:</strong> Welcome to the World Wildlife Fund! How can we help you protect wildlife today?
+                </div>
+            </div>
+            <div class="chat-footer">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Type your message here...">
+                <div class="chat-buttons">
+                    <button class="btn" id="send-btn">Send</button>
+                    <button class="btn" id="reset-btn">Reset Chat</button>
+                </div>
             </div>
         </div>
-        <div class="chat-footer">
-            <input type="text" class="chat-input" id="chat-input" placeholder="Type your message here...">
-            <div class="chat-buttons">
-                <button class="btn" id="send-btn">Send</button>
-                <button class="btn" id="reset-btn">Reset Chat</button>
-            </div>
+
+        <div class="webcam-container">
+            <video id="webcam" autoplay></video>
         </div>
     </div>
 
     <script>
+        // Access the webcam and display the video feed
+        const webcamElement = document.getElementById('webcam');
+
+        function startWebcam() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function (stream) {
+                        webcamElement.srcObject = stream;
+                    })
+                    .catch(function (error) {
+                        console.error("Webcam access error:", error);
+                    });
+            }
+        }
+
+        startWebcam();
+
+        // Function to show typing indicator
+        function showTypingIndicator() {
+            const chatBody = document.getElementById('chat-body');
+            chatBody.innerHTML += `<div class="chat-message typing-indicator" id="typing-indicator"><strong>WWF Bot:</strong> Typing...</div>`;
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // Function to remove typing indicator
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
         // Function to send a message to the Flask backend
         async function sendMessage() {
             const message = document.getElementById('chat-input').value;
             if (message) {
+                showTypingIndicator();
                 const response = await fetch('/chat', {
                     method: 'POST',
                     headers: {
@@ -153,6 +228,7 @@
 
                 const data = await response.json();
                 const chatBody = document.getElementById('chat-body');
+                removeTypingIndicator();
 
                 if (response.ok) {
                     chatBody.innerHTML += `<div class="chat-message user-message"><strong>You:</strong> ${message}</div>`;
