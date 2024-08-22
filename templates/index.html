@@ -183,22 +183,17 @@
         // Access the webcam and display the video feed
         const webcamElement = document.getElementById('webcam');
 
-        function startWebcam() {
-            // Check for Raspberry Pi camera module first
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-                    .then(function (stream) {
-                        webcamElement.srcObject = stream;
-                    })
-                    .catch(function (error) {
-                        console.error("Webcam access error:", error);
-                    });
-            } else {
-                console.error("MediaDevices API or getUserMedia not supported");
+        async function startWebcam() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                webcamElement.srcObject = stream;
+            } catch (error) {
+                console.error("Webcam access error:", error);
+                alert("Failed to access the camera. Please ensure the camera is connected and enabled.");
             }
         }
 
-        startWebcam();
+        window.onload = startWebcam;
 
         // Function to show typing indicator
         function showTypingIndicator() {
@@ -276,4 +271,9 @@
             document.getElementById('chat-input').value = '';
         }
 
-        document.get
+        document.getElementById('send-btn').addEventListener('click', sendMessage);
+        document.getElementById('reset-btn').addEventListener('click', resetChat);
+    </script>
+</body>
+
+</html>
