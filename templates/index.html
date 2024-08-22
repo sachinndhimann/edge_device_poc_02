@@ -150,7 +150,6 @@
 
     <div class="background-video">
         <video autoplay muted loop id="wildlifeVideo">
-            templates\3011374-uhd_3840_2160_24fps.mp4
             <source src="{{ url_for('static', filename='videos/3011374-uhd_3840_2160_24fps.mp4') }}" type="video/mp4">
             Your browser does not support HTML5 video.
         </video>
@@ -185,14 +184,17 @@
         const webcamElement = document.getElementById('webcam');
 
         function startWebcam() {
+            // Check for Raspberry Pi camera module first
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true })
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
                     .then(function (stream) {
                         webcamElement.srcObject = stream;
                     })
                     .catch(function (error) {
                         console.error("Webcam access error:", error);
                     });
+            } else {
+                console.error("MediaDevices API or getUserMedia not supported");
             }
         }
 
@@ -211,6 +213,19 @@
             if (typingIndicator) {
                 typingIndicator.remove();
             }
+        }
+
+        // Function to simulate typing effect
+        function simulateTyping(text, element) {
+            let index = 0;
+            function typeCharacter() {
+                if (index < text.length) {
+                    element.innerHTML += text.charAt(index);
+                    index++;
+                    setTimeout(typeCharacter, 100); // Adjust speed of typing here
+                }
+            }
+            typeCharacter();
         }
 
         // Function to send a message to the Flask backend
@@ -232,7 +247,11 @@
 
                 if (response.ok) {
                     chatBody.innerHTML += `<div class="chat-message user-message"><strong>You:</strong> ${message}</div>`;
-                    chatBody.innerHTML += `<div class="chat-message bot-message"><strong>WWF Bot:</strong> ${data.response}</div>`;
+                    const botMessageElement = document.createElement('div');
+                    botMessageElement.className = 'chat-message bot-message';
+                    botMessageElement.innerHTML = '<strong>WWF Bot:</strong> ';
+                    chatBody.appendChild(botMessageElement);
+                    simulateTyping(data.response, botMessageElement);
                 } else {
                     chatBody.innerHTML += `<div class="chat-message bot-message"><strong>WWF Bot:</strong> Error: ${data.error}</div>`;
                 }
@@ -257,9 +276,4 @@
             document.getElementById('chat-input').value = '';
         }
 
-        document.getElementById('send-btn').addEventListener('click', sendMessage);
-        document.getElementById('reset-btn').addEventListener('click', resetChat);
-    </script>
-</body>
-
-</html>
+        document.get
